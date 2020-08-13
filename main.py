@@ -48,11 +48,15 @@ class SlantGame:
     choices = [SolutionEnum.SLASH, SolutionEnum.BACKSLASH]
     # Fill the solution with random values
     # TODO : can be improved by using bytes from random integer
-    self._sol = [[
-      self._random_gen.choice(choices)
-       for _ in range(self._w) ]
-        for _ in range(self._h)
-    ]
+
+    for y in range(self._h):
+      for x in range(self._w):
+        val = self._random_gen.choice(choices)
+
+        self._sol[y][x] = val
+         
+
+
 
   #fs = (dsf_canonify(connected, y*W+x) ==
   #      dsf_canonify(connected, (y+1)*W+(x+1)));
