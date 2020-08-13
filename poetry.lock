@@ -1,0 +1,17 @@
+[[package]]
+category = "main"
+description = "Disjoint set data structure implementation for Python"
+name = "disjoint-set"
+optional = false
+python-versions = "*"
+version = "0.6.3"
+
+[metadata]
+content-hash = "3466ef039c983b96ff6789c29824034f0e5ed4f16f9effd60f16d0c26982db3d"
+python-versions = "^3.8"
+
+[metadata.files]
+disjoint-set = [
+    {file = "disjoint_set-0.6.3-py3-none-any.whl", hash = "sha256:094914c68c9c7ef584aa652685a88dcb00f43417b9886bca1006823fb9938ff5"},
+    {file = "disjoint_set-0.6.3.tar.gz", hash = "sha256:3b0ca1b913f7ee2b8348f17481e1393956140573942fa7e9295798efb377f9a6"},
+]
