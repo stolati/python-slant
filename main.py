@@ -67,9 +67,12 @@ class LoopChecks:
       return True
 
     # Worst case, need to add everything from a and b
-    ab_set = a_set | b_set
-    for e in ab_set:
-      self._links[e] = ab_set
+    if b_set > a_set:
+      b_set, a_set = a_set, b_set
+
+    a_set.update(b_set)
+    for e in b_set:
+      self._links[e] = a_set
     return True
 
 
