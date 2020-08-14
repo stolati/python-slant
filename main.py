@@ -101,18 +101,22 @@ class SlantGame:
     self.generate_slant()
 
   def get_sol(self, sol_pos):
+    if sol_pos.sol_y < 0 or sol_pos.sol_x < 0:
+      raise IndexError("no negative index")
     return self._sol[sol_pos.sol_y][sol_pos.sol_x]
 
   def get_clue(self, clue_pos):
+    if clue_pos.clue_y < 0 or clue_pos.clue_x < 0:
+      raise IndexError("no negative index")
     return self._clues[clue_pos.clue_y][clue_pos.clue_x]
 
   def get_link_sol(self, clue_pos):
     return []
 
   
-  def _connections(self, sol_pos, sol=None):
+  def _sol_connections(self, sol_pos, sol=None):
     if sol == None:
-      sol = self._get_sol(sol_pos)
+      sol = self.get_sol(sol_pos)
     if sol == SolutionEnum.NONE:
       return ()
     if sol == SolutionEnum.SLASH:
@@ -126,6 +130,37 @@ class SlantGame:
         CluePos(clue_x=sol_pos.sol_x+1, clue_y=sol_pos.sol_y+1),
       )
     raise Exception("_connections")
+  
+  def _clue_adjacent(self, clue_pos):
+
+    def _calculate_sol(delta_x, delta_y, connect_if_is):
+
+      sol_pos = SolPos(sol_x=clue_pos.clue_x+delta_x, sol_y=clue_pos.clue_y+delta_y)
+
+      try:
+        sol_val = self.get_sol(sol_pos)
+        return {
+          'val':sol_val,
+          'pos':sol_pos,
+          'connected': (connect_if_is is sol_val),
+        }
+      except IndexError:
+        return None
+    
+    params = [ # delta x, delta y, connection value
+      (0, 0, SolutionEnum.BACKSLASH), # bottom right
+      (-1, 0, SolutionEnum.SLASH), # bottom left
+      (0, -1, SolutionEnum.SLASH), # top right
+      (-1, -1, SolutionEnum.BACKSLASH), # top left
+    ]
+
+    return list(filter(None, [
+      _calculate_sol(*param) for param in params
+    ]))
+
+  
+  def _col_adjacent_count_links(self, clue_pos):
+    return len([x for x in self._clue_adjacent(clue_pos) if x['connected']])
 
   def loop_sol(self):
     for y in range(self._h):
@@ -143,7 +178,6 @@ class SlantGame:
   def set_clue(self, clue_pos, val):
     self._clues[clue_pos.clue_y][clue_pos.clue_x] = val
 
-
   def generate_slant(self):
     choices = [SolutionEnum.SLASH, SolutionEnum.BACKSLASH]
     # Fill the solution with random values
@@ -154,46 +188,22 @@ class SlantGame:
     for sol_pos in self.loop_sol():
       val = self._random_gen.choice(choices)
 
-      connections = self._connections(sol_pos, val)
+      connections = self._sol_connections(sol_pos, val)
 
       valid = loop_checks.add(*connections)
       if not valid:
         val = val.invert()
     
-      connections = self._connections(sol_pos, val)
+      connections = self._sol_connections(sol_pos, val)
       valid = loop_checks.add(*connections)
 
       self.set_sol(sol_pos, val)
     
     # Fill the complete set of clues
     for clue_pos in self.loop_clues():
-
-      self.set_clue(clue_pos, 0)
-
-
-
+      num_links = (self._col_adjacent_count_links(clue_pos))
+      self.set_clue(clue_pos, num_links)
          
-
-
-
-  #fs = (dsf_canonify(connected, y*W+x) ==
-  #      dsf_canonify(connected, (y+1)*W+(x+1)));
-  #bs = (dsf_canonify(connected, (y+1)*W+x) ==
-  #      dsf_canonify(connected, y*W+(x+1)));
-  #
-  #assert(!(fs && bs));
-  #
-  #v = fs ? +1 : bs ? -1 : 2 * random_upto(rs, 2) - 1;
-  #fill_square(w, h, x, y, v, soln, connected, NULL);
-  #   }
-  #
-  #   sfree(indices);
-  #   sfree(connected);
-  #
-  #
-  #   pass
-  
-
   def __str__(self):
 
     def _str_clue_line(clue_line):
