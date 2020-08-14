@@ -201,7 +201,7 @@ class SlantBoard(object):
     res.append(_str_clue_line(self._clues[-1]))
 
     return '\n'.join(res)
-  
+
   def is_solved(self):
     # Loop checks, and that we filled everything
     loop_checks = LoopChecks()
@@ -238,10 +238,10 @@ class SlantBoard(object):
 
 class SlantGame(SlantBoard):
 
-  def __init__(self, game_params, random_gen):
+  def __init__(self, game_params, random_seed):
     w, h, self.d = game_params
     super().__init__(w, h)
-    self._random_gen = random_gen
+    self._random_gen = random.Random(random_seed)
 
   def generate_slant(self):
     choices = [SolutionEnum.SLASH, SolutionEnum.BACKSLASH]
@@ -297,42 +297,47 @@ class SlantGame(SlantBoard):
 
 
 def board_solver_simple_count(board):
-  # For every elements, try to find if we can simply solve it
-  for clue_pos in board.loop_clues():
-    clue_info = board.clue_info(clue_pos)
-    clue_val = board.get_clue(clue_pos)
+  had_change = True
 
-    if clue_val == EMPTY_CLUE:
-      continue
-
-    # Already solved
-    if len(clue_info.empty) == 0:
-      continue
-
-    free_spots = len(clue_info.empty)
-    rest_linked = clue_val - len(clue_info.linked)
-
-    # Case when we only have connection left
-    if free_spots == rest_linked:
-      for sol_pos, val in clue_info.empty:
-        board.set_sol(sol_pos, val)
-
-    # Only unlink to have
-    if rest_linked == 0:
-      for sol_pos, val in clue_info.empty:
-        board.set_sol(sol_pos, val.invert())
+  while had_change:
+    had_change = False
+  
+    # For every elements, try to find if we can simply solve it
+    for clue_pos in board.loop_clues():
+      clue_info = board.clue_info(clue_pos)
+      clue_val = board.get_clue(clue_pos)
+  
+      if clue_val == EMPTY_CLUE:
+        continue
+  
+      # Already solved
+      if len(clue_info.empty) == 0:
+        continue
+  
+      free_spots = len(clue_info.empty)
+      rest_linked = clue_val - len(clue_info.linked)
+  
+      # Case when we only have connection left
+      if free_spots == rest_linked:
+        for sol_pos, val in clue_info.empty:
+          board.set_sol(sol_pos, val)
+        had_change = True
+  
+      # Only unlink to have
+      if rest_linked == 0:
+        for sol_pos, val in clue_info.empty:
+          board.set_sol(sol_pos, val.invert())
+        had_change = True
   
 
 
 def main():
-  random_gen = random.Random(42)
   game_params = GameParams(20, 10, DifficultyEnum.EASY)
 
-  sg = SlantGame(game_params, random_gen)
+  sg = SlantGame(game_params, random_seed=42)
   sg.new_game()
 
   print(sg)
-
 
 if __name__ == '__main__':
   main()
