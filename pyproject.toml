@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "slant-python"
+name = "slant"
 version = "0.1.0"
-description = ""
+description = "Slant game algo in python"
 authors = ["Mickael Kerbrat <stolati@gmail.com>"]
 
 [tool.poetry.dependencies]
